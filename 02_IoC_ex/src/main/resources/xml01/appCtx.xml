@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!--  Contact, Address, Person bean 만들기(<property>, <constructor-arg>) -->
+
+  <!-- property로 만들기 -->
+  <bean class="com.gdu.app02.xml01.Contact" id="contact1">
+    <property name="mobile" value="010-0000-0000"></property>
+    <property name="fax" value="02-4929-3932"></property>
+  </bean>
+  <bean class="com.gdu.app02.xml01.Address" id="address1">
+    <property name="postcode" value="08646"></property>
+    <property name="jibun" value="금천구 벽산아파트"></property>
+    <property name="road" value="금하로816"></property>
+  </bean>
+  <bean class="com.gdu.app02.xml01.Person" id="person1">
+    <property name="name" value="정찬호"></property>
+    <property name="contact" ref="contact1"></property>
+    <property name="address" ref="address1"></property>
+  </bean>
+
+  <!-- constructor-arg로 만들기 -->
+  <bean class="com.gdu.app02.xml01.Contact" id="contact2">
+    <constructor-arg value="010-0000-0000" />
+    <constructor-arg value="02-492-03-120325" />
+  </bean>
+  <bean class="com.gdu.app02.xml01.Address" id="address2">
+    <constructor-arg value="08646"/>
+    <constructor-arg value="금천구 벽산아파트"/>
+    <constructor-arg value="금하로 816"/>
+  </bean>
+  <bean class="com.gdu.app02.xml01.Person" id="person2">
+    <constructor-arg value="정찬호" />
+    <constructor-arg ref="contact2" />
+    <constructor-arg ref="address2" />
+  </bean>
+
+</beans>
