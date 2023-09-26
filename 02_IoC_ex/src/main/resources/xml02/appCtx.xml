@@ -14,7 +14,7 @@
   <!--  MyJdbcDao 객체 만들기 -->
   <bean class="com.gdu.app02.xml02.MyJdbcDao" id="dao" scope="singleton"/>
   
-  <!--  MyJdbcService 객체 만들기 -->
+  <!--  MyJdbcService 객체 만들기 --> 
   <bean class="com.gdu.app02.xml02.MyJdbcService" id="service">
     <property name="myJdbcDao" ref="dao"></property>
   </bean>
