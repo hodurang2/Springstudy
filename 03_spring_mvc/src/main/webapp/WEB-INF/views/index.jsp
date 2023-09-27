@@ -19,8 +19,23 @@
   <div>
     <a href="${contextPath}/notice/list.do">notice 목록</a>
     <br>
-    <a href="${contextPath}/member/list.do">member 목록</a>
+    <a href="${contextPath}/member/list">member 목록</a>
   </div>
+  
+  <%-- MyController03으로 요청 --%>
+  <div>
+    <a href="${contextPath}/blog/detail.do?blogNo=100">블로그 상세보기</a>
+  </div>
+  
+  <%-- MyController04으로 요청 --%>
+  <div>
+    <a href="${contextPath}/article/add.do?title=이럴수가">기사 등록하기</a>
+  </div>
+  ${sessionScope.title}
+  <div>
+    <a href="${contextPath}/article/confirm.do?title=2럴수가">세션 정보 확인하기</a>
+  </div>
+  
   
   
 </body>
