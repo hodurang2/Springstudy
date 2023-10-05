@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.gdu.app03.dto.BlogDto;
 
+@RequestMapping(value="/blog") // blog로 시작하는 요청을 처리하는 컨트롤러가 된다.
+                               // 모든 메소드의 요청에 "/blog"가 자동으로 삽인된다.
+                               
 @Controller
 public class MyController03 {
 
@@ -19,13 +22,13 @@ public class MyController03 {
    *  2) 파라미터뿐만 아니라 HttpSession session, String contextPath와 같은 정보도 꺼낼 수 있으므로 여전히 강력한 도구이다. 
    */
   
-  // @RequestMapping("/blog/detail.do")  // GET 방식의 method는 생략할 수 있다. value만 작성할 땐 value= 부분도 생략할 수 있다.
+  // @RequestMapping("/detail.do")  // GET 방식의 method는 생략할 수 있다. value만 작성할 땐 value= 부분도 생략할 수 있다.
   public String blogDetail(HttpServletRequest request, Model model) {
     // ViewResolver의 prefix : /WEB-INF/views/
     // ViewResolver의 suffix : .jsp
     String blogNo = request.getParameter("blogNo");
     model.addAttribute("blogNo", blogNo);
-    return "blog/detail";  //  /WEB-INF/views/blog/detail.jsp로 forward한다.
+    return "detail";  //  /WEB-INF/views/blog/detail.jsp로 forward한다.
   }
   
   /* 
@@ -38,10 +41,10 @@ public class MyController03 {
    *  3) @RequestParam을 생략할 수 있다.
    */
   
-  // @RequestMapping("/blog/detail.do")
+  // @RequestMapping("/detail.do")
   public String blogDetail2(@RequestParam(value="blogNo",required = false , defaultValue = "1") int blogNo, Model model) {
     model.addAttribute("blogNo", blogNo);
-    return "blog/detail";
+    return "/detail";
   }
   
   /*
@@ -52,15 +55,15 @@ public class MyController03 {
    *  4) 커맨드 객체는 자동으로 Model에 저장된다. 저장될 때 객체명(dto)이 아닌 클래스명(BlogDto)으로 저장된다. (클래스명을 LowerCamelCase로 바꿔서 저장한다.)
    */
   
-  // @RequestMapping("/blog/detail.do")
+  // @RequestMapping("/detail.do")
   public String blogDetail3(BlogDto dto) {
-    return "blog/detail";
+    return "/detail";
   }
   
   // @ModelAttribute를 이용해서 Model에 저장되는 커맨드 객체의 이름을 지정할 수 있다.
-  @RequestMapping("/blog/detail.do")
+  @RequestMapping("/detail.do")
   public String blogDetail4(@ModelAttribute("dto") BlogDto dto) { // Model에 저장되는
-    return "blog/detail";
+    return "/detail";
   }
   
   
