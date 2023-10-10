@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class AjaxServiceImpl implements AjaxService {
-
   private final AjaxDao ajaxDao;
   
   @Override

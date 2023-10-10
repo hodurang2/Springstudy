@@ -19,19 +19,19 @@
 	  $('#btn_list').click(function(){
 		  $.ajax({
     	// 요청
-        type: 'get',
+      type: 'get',
     	url: '${contextPath}/ajax1/list.do',
     	// 응답
     	dataType: 'json',
     	success: function(resData){
     	  $('#list').empty();
 			  $.each(resData, function(i, elem){
-				$('#list').append('<div class="row"><span>' + elem.name + '</span>, ' + elem.age + '</div>');
+				  $('#list').append('<div class="row"><span>' + elem.name + '</span>, ' + elem.age + '</div>');
 			  })
 			}
-      })
-	  })
-  }
+    })
+  })
+}
   
   
   function fnDetail(){
