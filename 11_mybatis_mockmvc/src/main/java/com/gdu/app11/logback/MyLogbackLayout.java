@@ -1,4 +1,4 @@
-package com.gdu.app11.logBack;
+package com.gdu.app11.logback;
 
 import java.text.SimpleDateFormat;
 

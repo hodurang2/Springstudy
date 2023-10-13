@@ -1,4 +1,4 @@
-package com.gdu.app11.controller;
+package com.gdu.app12.controller;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.gdu.app11.dto.ContactDto;
-import com.gdu.app11.service.ContactService;
+import com.gdu.app12.dto.ContactDto;
+import com.gdu.app12.service.ContactService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class ContactController {
   private final ContactService contactService;
   
   @RequestMapping(value="/contact/list.do", method=RequestMethod.GET)
-  public String list(Model model) {
+  public String list(Model model) { 
     List<ContactDto> contactList = contactService.getContactList( );
     model.addAttribute("contactList", contactList);
     return "contact/list";
