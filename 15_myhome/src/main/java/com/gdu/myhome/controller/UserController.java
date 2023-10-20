@@ -1,8 +1,12 @@
 package com.gdu.myhome.controller;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Controller
 public class UserController {
-
+  
   private final UserService userService;
-
+  
   @GetMapping("/login.form")
   public String loginForm(HttpServletRequest request, Model model) {
     // referer : 이전 주소가 저장되는 요청 Header 값
@@ -30,12 +34,12 @@ public class UserController {
   }
   
   @PostMapping("/login.do")
-  public void  login(HttpServletRequest request, HttpServletResponse response) {
+  public void login(HttpServletRequest request, HttpServletResponse response) {
     userService.login(request, response);
   }
   
   @GetMapping("/logout.do")
-  public void  logout(HttpServletRequest request, HttpServletResponse response) {
+  public void logout(HttpServletRequest request, HttpServletResponse response) {
     userService.logout(request, response);
   }
   
@@ -52,12 +56,24 @@ public class UserController {
     if(service.equals("off")) {
       rtn = "redirect:/main.do";
     } else {
-      model.addAttribute("event", event);   // user폴더 join.jsp로전달하는 event는 "on" 또는 "off" 값을 가진다.
+      model.addAttribute("event", event);  // user 폴더 join.jsp로 전달하는 event는 "on" 또는 "off" 값을 가진다.
       rtn = "user/join";
     }
-    
     return rtn;
   }
+  
+  @GetMapping(value="/checkEmail.do", produces=MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email) {
+    System.out.println(email);
+    return userService.checkEmail(email);
+  }
+  
+  @GetMapping(value="/sendCode.do", produces=MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Map<String, Object>> sendCode(@RequestParam String email) {
+    return userService.sendCode(email);
+  }
+  
+  
   
   
 }
