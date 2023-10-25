@@ -11,7 +11,7 @@ public interface NoticeMapper {
   
   int modifyNotice(NoticeDto noticeDto);
   NoticeDto getNotice(int noticeNo);
-  int addNotice(NoticeDto noticeDto);
   List<NoticeDto> getNoticeList();
+  int addNotice(NoticeDto noticeDto);
   
 }

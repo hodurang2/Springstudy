@@ -16,7 +16,15 @@
     <projcet.reporting.outputEncoding>UTF-8</projcet.reporting.outputEncoding>
   </properties>
 
+
   <dependencies>
+    
+    <!-- https://mvnrepository.com/artifact/org.json/json -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20231013</version>
+    </dependency>
 
     <!-- Random Spring -->
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
