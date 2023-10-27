@@ -150,7 +150,7 @@ public class FileServiceImpl implements FileService {
      *    /storage/** 주소로 요청을 하면 /storage/ 디렉터리 내용을 보여주는 <resources>
      */
     
-    return Map.of("url",)
+    return Map.of();
     
   }
   
