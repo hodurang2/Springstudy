@@ -41,50 +41,40 @@ public class UserServiceImpl implements UserService {
   private final String client_id = "MXYE0UGaBQxYKJBo9iYD";
   private final String client_secret = "LBxd4WN73R";
   
-  
   @Override
-  public void login(HttpServletRequest request, HttpServletResponse response) throws Exception{
+  public void login(HttpServletRequest request, HttpServletResponse response) throws Exception {
     
     String email = request.getParameter("email");
     String pw = mySecurityUtils.getSHA256(request.getParameter("pw"));
     
     Map<String, Object> map = Map.of("email", email
                                    , "pw", pw);
-    
+
     HttpSession session = request.getSession();
     
-    // 휴면 계정인지 확인
+    // 휴면 계정인지 확인하기
     InactiveUserDto inactiveUser = userMapper.getInactiveUser(map);
     if(inactiveUser != null) {
-      // 정보저장 (inactiveUser)
       session.setAttribute("inactiveUser", inactiveUser);
-      // 이동 (/user/active.form) -> user/active.jsp
       response.sendRedirect(request.getContextPath() + "/user/active.form");
     }
     
+    // 정상적인 로그인 처리하기
     UserDto user = userMapper.getUser(map);
     
     if(user != null) {
       request.getSession().setAttribute("user", user);
       userMapper.insertAccess(email);
-      try {
-        response.sendRedirect(request.getParameter("referer"));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      response.sendRedirect(request.getParameter("referer"));
     } else {
-      try {
-        response.setContentType("text/html; charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        out.println("<script>");
-        out.println("alert('일치하는 회원 정보가 없습니다.')");
-        out.println("location.href='"+request.getContextPath()+"/main.do'");
-        out.println("</script>");
-        out.flush();
-        out.close();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      response.setContentType("text/html; charset=UTF-8");
+      PrintWriter out = response.getWriter();
+      out.println("<script>");
+      out.println("alert('일치하는 회원 정보가 없습니다.')");
+      out.println("location.href='" + request.getContextPath() + "/main.do'");
+      out.println("</script>");
+      out.flush();
+      out.close();
     }
     
   }
@@ -93,14 +83,15 @@ public class UserServiceImpl implements UserService {
   public String getNaverLoginURL(HttpServletRequest request) throws Exception {
     
     // 네이버로그인-1
-    // 네이버 로그인 연동 URL 생성하기를 위해 redirect_url(URLEncoder), state(SecureRandom) 값의 전달이 필요하다.
+    // 네이버 로그인 연동 URL 생성하기를 위해 redirect_uri(URLEncoder), state(SecureRandom) 값의 전달이 필요하다.
     // redirect_uri : 네이버로그인-2를 처리할 서버 경로를 작성한다.
     // redirect_uri 값은 네이버 로그인 Callback URL에도 동일하게 등록해야 한다.
+    
     String apiURL = "https://nid.naver.com/oauth2.0/authorize";
     String response_type = "code";
     String redirect_uri = URLEncoder.encode("http://localhost:8080" + request.getContextPath() + "/user/naver/getAccessToken.do", "UTF-8");
     String state = new BigInteger(130, new SecureRandom()).toString();
-
+  
     StringBuilder sb = new StringBuilder();
     sb.append(apiURL);
     sb.append("?response_type=").append(response_type);
@@ -117,14 +108,14 @@ public class UserServiceImpl implements UserService {
     
     // 네이버로그인-2
     // 접근 토큰 발급 요청
-    // 네이버로그인-2를 수행하기 위해서는 네이버로그인-1의 응답결과인 code와 state가 필요하다.
+    // 네이버로그인-2를 수행하기 위해서는 네이버로그인-1의 응답 결과인 code와 state가 필요하다.
     
-    // 네이버로그인-1의 응답결과(access_token을 얻기 위해 요청 파라미터로 사용해야 함)
+    // 네이버로그인-1의 응답 결과(access_token을 얻기 위해 요청 파라미터로 사용해야 함)
     String code = request.getParameter("code");
     String state = request.getParameter("state");
     
     String apiURL = "https://nid.naver.com/oauth2.0/token";
-    String grant_type = "authorization_code";  // access_token 발급 받을 때 사용하는 값(갱신과 삭제는 다른 값 사용)
+    String grant_type = "authorization_code";  // access_token 발급 받을 때 사용하는 값(갱신이나 삭제시에는 다른 값을 사용함)
     
     StringBuilder sb = new StringBuilder();
     sb.append(apiURL);
@@ -132,12 +123,12 @@ public class UserServiceImpl implements UserService {
     sb.append("&client_id=").append(client_id);
     sb.append("&client_secret=").append(client_secret);
     sb.append("&code=").append(code);
-    sb.append("&=state").append(state);
+    sb.append("&state=").append(state);
     
     // 요청
     URL url = new URL(sb.toString());
     HttpURLConnection con = (HttpURLConnection)url.openConnection();
-    con.setRequestMethod("GET");
+    con.setRequestMethod("GET");  // 반드시 대문자로 작성
     
     // 응답
     BufferedReader reader = null;
@@ -145,31 +136,31 @@ public class UserServiceImpl implements UserService {
     if(responseCode == 200) {
       reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
     } else {
-      reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+      reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
     }
     
     String line = null;
     StringBuilder responseBody = new StringBuilder();
-    while((line = reader.readLine()) != null) {
+    while ((line = reader.readLine()) != null) {
       responseBody.append(line);
     }
     
-    JSONObject obj = new JSONObject(responseBody.toString() );
-    
-    
+    JSONObject obj = new JSONObject(responseBody.toString());
     return obj.getString("access_token");
     
   }
   
   @Override
   public UserDto getNaverProfile(String accessToken) throws Exception {
-    // 네이버 로그인-3
-    // 접근 토큰을 전달한 뒤 사용자의 프로필 정보(이름, 이메일, 성별 휴대전화번호) 받아오기
-    // 요청 헤더에 Authorization: Bearer AccessToken 정보를 저장하고 요청함
     
+    // 네이버 로그인-3
+    // 접근 토큰을 전달한 뒤 사용자의 프로필 정보(이름, 이메일, 성별, 휴대전화번호) 받아오기
+    // 요청 헤더에 Authorization: Bearer accessToken 정보를 저장하고 요청함
+    
+    // 요청
     String apiURL = "https://openapi.naver.com/v1/nid/me";
     URL url = new URL(apiURL);
-    HttpURLConnection con = (HttpURLConnection)url.openConnection(); 
+    HttpURLConnection con = (HttpURLConnection)url.openConnection();
     con.setRequestMethod("GET");
     con.setRequestProperty("Authorization", "Bearer " + accessToken);
     
@@ -179,12 +170,12 @@ public class UserServiceImpl implements UserService {
     if(responseCode == 200) {
       reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
     } else {
-      reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+      reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
     }
     
     String line = null;
     StringBuilder responseBody = new StringBuilder();
-    while((line = reader.readLine()) != null) {
+    while ((line = reader.readLine()) != null) {
       responseBody.append(line);
     }
     
@@ -192,19 +183,19 @@ public class UserServiceImpl implements UserService {
     JSONObject obj = new JSONObject(responseBody.toString());
     JSONObject response = obj.getJSONObject("response");
     UserDto user = UserDto.builder()
-                      .email(response.getString("email"))
-                      .name(response.getString("name"))
-                      .gender(response.getString("gender"))
-                      .mobile(response.getString("mobile"))
-                      .build();
-    
+                    .email(response.getString("email"))
+                    .name(response.getString("name"))
+                    .gender(response.getString("gender"))
+                    .mobile(response.getString("mobile"))
+                    .build();
     
     return user;
+    
   }
   
   @Override
   public UserDto getUser(String email) {
-    return userMapper.getUser(Map.of("email",email));
+    return userMapper.getUser(Map.of("email", email));
   }
   
   @Override
@@ -221,7 +212,7 @@ public class UserServiceImpl implements UserService {
                     .name(name)
                     .gender(gender)
                     .mobile(mobile.replace("-", ""))
-                    .agree(event.equals("on") ? 1 : 0)
+                    .agree(event != null ? 1 : 0)
                     .build();
     
     int naverJoinResult = userMapper.insertNaverUser(user);
@@ -248,7 +239,7 @@ public class UserServiceImpl implements UserService {
     }
     
   }
-  
+
   @Override
   public void naverLogin(HttpServletRequest request, HttpServletResponse response, UserDto naverProfile) throws Exception {
     
@@ -263,7 +254,7 @@ public class UserServiceImpl implements UserService {
       PrintWriter out = response.getWriter();
       out.println("<script>");
       out.println("alert('일치하는 회원 정보가 없습니다.')");
-      out.println("location.href='"+request.getContextPath()+"/main.do'");
+      out.println("location.href='" + request.getContextPath() + "/main.do'");
       out.println("</script>");
       out.flush();
       out.close();
@@ -498,8 +489,9 @@ public class UserServiceImpl implements UserService {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    
   }
-
+  
   @Override
   public void inactiveUserBatch() {
     userMapper.insertInactiveUser();
@@ -508,7 +500,7 @@ public class UserServiceImpl implements UserService {
   
   @Override
   public void active(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
-    
+  
     InactiveUserDto inactiveUser = (InactiveUserDto)session.getAttribute("inactiveUser");
     String email = inactiveUser.getEmail();
     
@@ -520,8 +512,8 @@ public class UserServiceImpl implements UserService {
       PrintWriter out = response.getWriter();
       out.println("<script>");
       if(insertActiveUserResult == 1 && deleteInactiveUserResult == 1) {
-        out.println("alert('휴면계정이 복구되었습니다. 곧바로 로그인 해 주세요.')");
-        out.println("location.href='" + request.getContextPath() + "/main.do'"); // 로그인 페이지로 보내면 로그인 후 다시 휴면 계정 복구 페이지로 돌아오므로 main으로 이동한다.
+        out.println("alert('휴면계정이 복구되었습니다. 계정 활성화를 위해서 곧바로 로그인 해 주세요.')");
+        out.println("location.href='" + request.getContextPath() + "/main.do'");  // 로그인 페이지로 보내면 로그인 후 다시 휴면 계정 복구 페이지로 돌아오므로 main으로 이동한다.
       } else {
         out.println("alert('휴면계정이 복구가 실패했습니다. 다시 시도하세요.')");
         out.println("history.back()");
@@ -533,10 +525,7 @@ public class UserServiceImpl implements UserService {
       e.printStackTrace();
     }
     
-    
   }
-  
-  
-  
+
   
 }

@@ -45,7 +45,29 @@ public class BbsServiceImpl implements BbsService {
     String contextPath = request.getContextPath();
     model.addAttribute("paging", myPageUtils.getMvcPaging(contextPath + "/bbs/list.do"));
     model.addAttribute("total", total);
-    
   }
   
+  @Override
+  public BbsDto getBbs(int bbsNo) {
+    BbsDto bbs = bbsMapper.getBbs(bbsNo);
+    return bbs;
+  }
+  
+  @Override
+  public int addBbs(BbsDto bbs) {
+    int addResult = bbsMapper.insertBbs(bbs);
+    return addResult; 
+  }
+  
+  @Override
+  public int modifyBbs(BbsDto bbs) {
+    int modifyResult = bbsMapper.updateBbs(bbs);
+    return modifyResult;
+  }
+  
+  @Override
+  public int deleteBbs(int bbsNo) {
+    int removeResult = bbsMapper.deleteBbs(bbsNo);
+    return removeResult;
+  }
 }

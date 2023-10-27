@@ -18,7 +18,7 @@
 <body>
   <div>
     <h1>헬로 월드</h1>
-    <a href="${contextPath}/bbs/list.do">게시판</a>
+    <a href="${contextPath}/list.do">게시판</a>
   </div>
 </body>
 </html>

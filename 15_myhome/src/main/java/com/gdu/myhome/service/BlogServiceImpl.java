@@ -1,16 +1,24 @@
 package com.gdu.myhome.service;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.gdu.myhome.dao.BlogMapper;
 import com.gdu.myhome.dto.BlogDto;
+import com.gdu.myhome.dto.BlogImageDto;
 import com.gdu.myhome.util.MyFileUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +27,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class BlogServiceImpl implements BlogService {
 
-  private final MyFileUtils myFileUtils;
   private final BlogMapper blogMapper;
+  private final MyFileUtils myFileUtils;
   
   @Override
   public Map<String, Object> imageUpload(MultipartHttpServletRequest multipartRequest) {
@@ -61,12 +69,14 @@ public class BlogServiceImpl implements BlogService {
   
   @Override
   public int addBlog(HttpServletRequest request) {
-    
+
+    // BLOG_T에 추가할 데이터
     String title = request.getParameter("title");
     String contents = request.getParameter("contents");
     int userNo = Integer.parseInt(request.getParameter("userNo"));
     String ip = request.getRemoteAddr();
     
+    // BlogDto 생성
     BlogDto blog = BlogDto.builder()
                     .title(title)
                     .contents(contents)
@@ -74,9 +84,57 @@ public class BlogServiceImpl implements BlogService {
                     .ip(ip)
                     .build();
     
+    // BLOG_T에 추가
+    // BlogMapper의 insertBlog() 메소드를 실행하면
+    // insertBlog() 메소드로 전달한 blog 객체에 blogNo값이 저장된다.
     int addResult = blogMapper.insertBlog(blog);
     
-    return 0;
+    // BLOG 작성시 사용한 이미지 목록 (Jsoup 라이브러리 사용)
+    Document document = Jsoup.parse(contents);
+    Elements elements =  document.getElementsByTag("img");
+    
+    if(elements != null) {
+      for(Element element : elements) {
+        String src = element.attr("src");
+        String filesystemName = src.substring(src.lastIndexOf("/") + 1); 
+        BlogImageDto blogImage = BlogImageDto.builder()
+                                    .blogNo(blog.getBlogNo())
+                                    .imagePath(myFileUtils.getBlogImagePath())
+                                    .filesystemName(filesystemName)
+                                    .build();
+        blogMapper.insertBlogImage(blogImage);
+      }
+    }
+    
+    return addResult;
+    
+  }
+  
+  public void blogImageBatch() {
+    
+    // 1. 어제 작성된 블로그의 이미지 목록 (DB)
+    List<BlogImageDto> blogImageList = blogMapper.getBlogImageInYesterday();
+    
+    // 2. List<BlogImageDto> -> List<Path> (Path는 경로+파일명으로 구성)
+    List<Path> blogImagePathList = blogImageList.stream()
+                                                //  blogImageDto를 -> /blog/2023/10/26/파일명.jpg형태로 변경
+                                                .map(blogImageDto -> new File(blogImageDto.getImagePath(), blogImageDto.getFilesystemName()).toPath())
+                                                .collect(Collectors.toList());
+    
+    // 3. 어제 저장된 블로그 이미지 목록 (디렉토리)
+    File dir = new File(myFileUtils.getBlogImagePathInYesterday());
+    
+    // 4. 삭제할 File 객체들
+    // /blog/2023/10/26/파일명 중에서 포함여부를 정해서 true인 파일들만 targets리스트에 집어넣는다.  
+
+    File[] targets = dir.listFiles(file -> !blogImagePathList.contains(file.toPath()));
+
+    // 5. 삭제
+    if(targets != null && targets.length != 0) {
+      for(File target : targets) {
+        target.delete();
+      }
+    }
     
   }
   
