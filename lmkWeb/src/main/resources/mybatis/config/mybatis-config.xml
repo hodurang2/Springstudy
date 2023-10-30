@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    
+  <!-- 설정 -->
+  <settings>
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+  </settings>
+  
+  <typeAliases>
+    <typeAlias alias="UserDto"          type="com.gdu.lmkWeb.dto.UserDto"/>
+    <typeAlias alias="LeaveUserDto"     type="com.gdu.lmkWeb.dto.LeaveUserDto"/>
+    <typeAlias alias="InactiveUserDto"  type="com.gdu.lmkWeb.dto.InactiveUserDto"/>
+    <typeAlias alias="FreeDto"          type="com.gdu.lmkWeb.dto.FreeDto"/>
+    <typeAlias alias="BlogDto"          type="com.gdu.lmkWeb.dto.BlogDto"/>
+    <typeAlias alias="CommentDto"       type="com.gdu.lmkWeb.dto.CommentDto"/>
+    <typeAlias alias="BlogImageDto"     type="com.gdu.lmkWeb.dto.BlogImageDto"/>
+  </typeAliases>
+
+</configuration>
